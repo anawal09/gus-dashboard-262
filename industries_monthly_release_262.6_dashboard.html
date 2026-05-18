@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industries Monthly Release 262.6 Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .header .timestamp {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stat-card .number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .label {
+            font-size: 1em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            padding: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #667eea;
+            border-left: 4px solid #667eea;
+            padding-left: 15px;
+        }
+
+        .status-group {
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .status-header {
+            padding: 15px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            background: rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .work-items {
+            padding: 0;
+        }
+
+        .work-item {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            background: white;
+            transition: background 0.2s;
+        }
+
+        .work-item:hover {
+            background: #f8f9fa;
+        }
+
+        .work-item:last-child {
+            border-bottom: none;
+        }
+
+        .work-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .work-item-id {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .work-item-id a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .work-item-id a:hover {
+            text-decoration: underline;
+        }
+
+        .work-item-type {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .work-item-subject {
+            font-size: 1.05em;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+
+        .work-item-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .points-badge {
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .chart-bar {
+            margin-bottom: 12px;
+        }
+
+        .chart-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .chart-bar-fill {
+            height: 25px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .no-items {
+            padding: 40px;
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .work-item-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Industries Monthly Release Dashboard</h1>
+            <div class="subtitle">Patch 262.6</div>
+            <div class="timestamp">Generated: May 13, 2026 at 03:45 PM</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">8</div>
+                <div class="label">Total Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">1</div>
+                <div class="label">Closed</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">3</div>
+                <div class="label">In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">12</div>
+                <div class="label">Story Points</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Overview Charts</h2>
+            <div class="chart-container">
+
+                <div class="chart-card">
+                    <h3>Status Distribution</h3>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>In Progress</span>
+                            <span>3 (37.5%)</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 100.0%; background: #ffc107;">
+                            3
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Waiting</span>
+                            <span>2 (25.0%)</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 66.66666666666666%; background: #fd7e14;">
+                            2
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Triaged</span>
+                            <span>1 (12.5%)</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 33.33333333333333%; background: #17a2b8;">
+                            1
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Closed</span>
+                            <span>1 (12.5%)</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 33.33333333333333%; background: #28a745;">
+                            1
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Never</span>
+                            <span>1 (12.5%)</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 33.33333333333333%; background: #dc3545;">
+                            1
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="chart-card">
+                    <h3>Product Tags</h3>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>262_Monthly_Release</span>
+                            <span>5</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 100.0%;">
+                            5
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>CS - Atlas</span>
+                            <span>1</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 20.0%;">
+                            1
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Loyalty Velaryon</span>
+                            <span>1</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 20.0%;">
+                            1
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>262_Release_Exception</span>
+                            <span>1</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 20.0%;">
+                            1
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Work Items by Status</h2>
+
+            <div class="status-group">
+                <div class="status-header" style="background: #17a2b8;">
+                    <span>Triaged</span>
+                    <span class="status-badge">1 item</span>
+                </div>
+                <div class="work-items">
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Yc711YAB/view" target="_blank">W-22170215</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Orchestrator - DRO - Common Orchestrator Designer License</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Jason Zhang</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Aarti Somani</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Monthly_Release</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="points-badge">3 pts</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="status-group">
+                <div class="status-header" style="background: #ffc107;">
+                    <span>In Progress</span>
+                    <span class="status-badge">3 items</span>
+                </div>
+                <div class="work-items">
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WnUeKYAV/view" target="_blank">W-21713430</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Education Cloud - SweetPotatoes</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Soumya Snehashis</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Monthly_Release</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Y6xPrYAJ/view" target="_blank">W-22030816</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch-April) - Insurance cloud for FNOL Agent</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Soumya Snehashis</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Monthly_Release</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="points-badge">1 pts</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Z1ZfIYAV/view" target="_blank">W-22271113</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Life Sciences Cloud</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Venkata Sandeep Godavarthi</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Manad Gupta</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Monthly_Release</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="points-badge">3 pts</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="status-group">
+                <div class="status-header" style="background: #28a745;">
+                    <span>Closed</span>
+                    <span class="status-badge">1 item</span>
+                </div>
+                <div class="work-items">
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002YCKDMYA5/view" target="_blank">W-22045069</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Expose Apex method for Delete records</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Kaustub Sreekrishnan</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Lakshmana Vittanala</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>CS - Atlas</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="points-badge">2 pts</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="status-group">
+                <div class="status-header" style="background: #fd7e14;">
+                    <span>Waiting</span>
+                    <span class="status-badge">2 items</span>
+                </div>
+                <div class="work-items">
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Yea40YAB/view" target="_blank">W-22179909</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Loyalty Management (IME)</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Kartik Singal</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Mandeep Singh Rajpal</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>Loyalty Velaryon</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002ZkutNYAR/view" target="_blank">W-22430349</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (260 Patch) - Financial Services Cloud - Account Plan and Financial Deal Product Enhancements</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Vignesh Damodharan</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Jatin .</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Release_Exception</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="status-group">
+                <div class="status-header" style="background: #dc3545;">
+                    <span>Never</span>
+                    <span class="status-badge">1 item</span>
+                </div>
+                <div class="work-items">
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WtZsNYAV/view" target="_blank">W-21736955</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Orchestrator - DRO - PCM API Attribute Scopes</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Yury Petrov</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Géry Loutre</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Monthly_Release</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="points-badge">3 pts</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            Generated by GUS Dashboard Generator | Data from GUS via Salesforce CLI
+        </div>
+    </div>
+</body>
+</html>
