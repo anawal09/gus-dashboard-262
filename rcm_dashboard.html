@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCM Project Dashboard - Revenue Cloud Management</title>
+    <title>RCM Project Dashboard - Regulated Content Management</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
@@ -51,6 +51,72 @@
             margin-top: 15px;
             font-size: 0.95em;
             opacity: 0.85;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 25px 40px;
+            border-bottom: 3px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 25px;
+            border: 2px solid #1e3c72;
+            background: white;
+            color: #1e3c72;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .filter-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn.active {
+            background: #1e3c72;
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+
+        .build-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .build-262 {
+            background: #e7f3ff;
+            color: #1e3c72;
+        }
+
+        .build-264 {
+            background: #f3e7ff;
+            color: #7e22ce;
         }
 
         .progress-section {
@@ -315,16 +381,52 @@
     <div class="container">
         <div class="header">
             <h1>🚀 RCM Project Dashboard</h1>
-            <div class="subtitle">Revenue Cloud Management - Project Overview</div>
-            <div class="timestamp">Generated: May 24, 2026 at 04:44 PM</div>
+            <div class="subtitle">Regulated Content Management - Project Overview</div>
+            <div class="timestamp">Generated: May 24, 2026 at 04:58 PM</div>
+        </div>
+
+        <div class="filter-section">
+            <span class="filter-label">Filter by Build:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-build="all" onclick="filterByBuild('all')">
+                    All Builds (455)
+                </button>
+                <button class="filter-btn" data-build="262" onclick="filterByBuild('262')">
+                    262 (327)
+                </button>
+                <button class="filter-btn" data-build="262.1" onclick="filterByBuild('262.1')">
+                    262.1 (4)
+                </button>
+                <button class="filter-btn" data-build="262.10" onclick="filterByBuild('262.10')">
+                    262.10 (2)
+                </button>
+                <button class="filter-btn" data-build="262.2" onclick="filterByBuild('262.2')">
+                    262.2 (7)
+                </button>
+                <button class="filter-btn" data-build="262.3" onclick="filterByBuild('262.3')">
+                    262.3 (1)
+                </button>
+                <button class="filter-btn" data-build="262.4" onclick="filterByBuild('262.4')">
+                    262.4 (2)
+                </button>
+                <button class="filter-btn" data-build="262.6" onclick="filterByBuild('262.6')">
+                    262.6 (1)
+                </button>
+                <button class="filter-btn" data-build="262.7" onclick="filterByBuild('262.7')">
+                    262.7 (2)
+                </button>
+                <button class="filter-btn" data-build="264" onclick="filterByBuild('264')">
+                    264 (109)
+                </button>
+            </div>
         </div>
 
         <div class="progress-section">
             <div class="progress-container">
-                <div class="progress-label">Overall Project Completion: 62.4%</div>
+                <div class="progress-label">Overall Project Completion: {completion_pct:.1f}%</div>
                 <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: 62.38095238095238%;">
-                        917 / 1470 pts
+                    <div class="progress-bar" style="width: {completion_pct}%;">
+                        {all_stats['completed_points']:.0f} / {all_stats['total_points']:.0f} pts
                     </div>
                 </div>
             </div>
@@ -332,30 +434,30 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="number">1000</div>
+                <div class="number">{all_stats['total']}</div>
                 <div class="label">Total Items</div>
             </div>
             <div class="stat-card epic">
-                <div class="number">0</div>
+                <div class="number">{len(epics)}</div>
                 <div class="label">Epics</div>
-                <div class="sublabel">0 points</div>
+                <div class="sublabel">{epic_stats['total_points']:.0f} points</div>
             </div>
             <div class="stat-card bug">
-                <div class="number">3</div>
+                <div class="number">{len(bugs)}</div>
                 <div class="label">Bugs</div>
-                <div class="sublabel">564 closed</div>
+                <div class="sublabel">{all_stats['by_status'].get('Closed', 0)} closed</div>
             </div>
             <div class="stat-card td">
-                <div class="number">0</div>
+                <div class="number">{len(tds)}</div>
                 <div class="label">Tech Debt</div>
-                <div class="sublabel">0 points</div>
+                <div class="sublabel">{td_stats['total_points']:.0f} points</div>
             </div>
             <div class="stat-card">
-                <div class="number">67</div>
+                <div class="number">{all_stats['by_status'].get('In Progress', 0)}</div>
                 <div class="label">In Progress</div>
             </div>
             <div class="stat-card">
-                <div class="number">564</div>
+                <div class="number">{all_stats['by_status'].get('Closed', 0)}</div>
                 <div class="label">Completed</div>
             </div>
         </div>
@@ -389,6 +491,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Subject</th>
+                        <th>Build</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Assignee</th>
@@ -397,31 +500,474 @@
                 </thead>
                 <tbody>
 
-                    <tr>
-                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE000025Mt8uYAC/view" target="_blank">W-17222652</a></td>
-                        <td>[Template to address feedback for Revenue Cloud Developer Guide]...</td>
-                        <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
-                        <td><span class="badge badge-priority" style="background: #6c757d;">None</span></td>
-                        <td>Unassigned</td>
-                        <td>N/A</td>
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VFRcSYAX/view" target="_blank">W-21339363</a></td>
+                        <td>[RCM] Localize labels for rejection modal and RegulationIngestedData validations...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #6c757d;">P4</span></td>
+                        <td>Nabeel Shaikh</td>
+                        <td>a06T0000001eB5OIAU</td>
                     </tr>
 
-                    <tr>
-                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002AwtL0YAJ/view" target="_blank">W-18017985</a></td>
-                        <td>[USABILITY] [REVENUE CLOUD]: <Your subject name here>...</td>
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Y25b6YAB/view" target="_blank">W-22012111</a></td>
+                        <td>[Revenue Cloud Integration Blitz] Config UI picklist and attributes summary out ...</td>
+                        <td><span class="build-badge build-264">264</span></td>
                         <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
-                        <td><span class="badge badge-priority" style="background: #6c757d;">None</span></td>
-                        <td>Jennifer Bove</td>
-                        <td>N/A</td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Rev Argos Scrum</td>
+                        <td>a06T0000001eB5OIAU</td>
                     </tr>
 
-                    <tr>
-                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002KgFRlYAN/view" target="_blank">W-19418005</a></td>
-                        <td>[Revenue Cloud Integration Blitz] <Bug Subject Description>...</td>
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002RY2UkYAL/view" target="_blank">W-20628775</a></td>
+                        <td>[Revenue Cloud Integration Blitz] Asset Transfers creates lifecycle overlap betw...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Najim Sutar</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002UHy0jYAD/view" target="_blank">W-21187919</a></td>
+                        <td>Remove the Unique Flex Index in PrioritizedRcmdDefinition and also update code t...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Lu Ping Chen ☢</td>
+                        <td>a06EE000004rIFsYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VGd95YAD/view" target="_blank">W-21342076</a></td>
+                        <td>Revenue Cloud Doc Bug: Customers expect the TLE to support new/recent features d...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Yash Mishra</td>
+                        <td>a06EE000004rIFsYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VcD8FYAV/view" target="_blank">W-21412136</a></td>
+                        <td>[RCM] Update the totalStagedClause query based on SatgedRegClause DMO change rel...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Priyanka Bhardwaj</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Vk31HYAR/view" target="_blank">W-21449087</a></td>
+                        <td>Revenue Cloud Doc Bug: Incorrect description of what permission is needed for De...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Yash Mishra</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VklyTYAR/view" target="_blank">W-21452983</a></td>
+                        <td>Rcmd creation: Cannot create rcmd from workbench. Definition ID not visible....</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Akhilesh Sharma</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VzwsbYAB/view" target="_blank">W-21513779</a></td>
+                        <td>Revenue Cloud Doc Bug: ISCLONE function is not compatible with Rev cloud clone a...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Yash Mishra</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WJ5pDYAT/view" target="_blank">W-21596688</a></td>
+                        <td>[SalesforceGo]Turn on Revenue Cloud Features is not having link...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Tanuj Kumar Kadiyala</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WKkGbYAL/view" target="_blank">W-21603513</a></td>
+                        <td>Test failures: testMultipleLeadChangesDeleteRecommendations, testEditAccessForPr...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Tara Yalamanchi</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262.1">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WoLFVYA3/view" target="_blank">W-21716138</a></td>
+                        <td>[RCM] No actions available on RID list view record dropdowns regardless of statu...</td>
+                        <td><span class="build-badge build-262">262.1</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Nabeel Shaikh</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Z3xMwYAJ/view" target="_blank">W-22281824</a></td>
+                        <td>Revenue Cloud Doc Bug: Publish the Best Practice topic, "Consolidating Multiple ...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Mary Burger</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002I0NBUYA3/view" target="_blank">W-19017122</a></td>
+                        <td>[Waiting on NGP Redesign in NGP 260 : Decimal Value Support in Pricing][264]Prem...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Not a bug</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Rajeev Kumar(NGP)</td>
+                        <td>a06EE000004rIFrYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WhVbmYAF/view" target="_blank">W-21692788</a></td>
+                        <td>[SalesforceGo] Setup Help is not alligned with Revenue Cloud Features...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Not a bug</span></td>
+                        <td><span class="badge badge-priority" style="background: #28a745;">P3</span></td>
+                        <td>Industries-Insurance-Ashoka Team</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002RTHykYAH/view" target="_blank">W-20614981</a></td>
+                        <td>[Revenue Cloud Integration Blitz] RunTime exception from pricing are not being t...</td>
+                        <td><span class="build-badge build-264">264</span></td>
                         <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
-                        <td><span class="badge badge-priority" style="background: #6c757d;">None</span></td>
-                        <td>Pranita Morisetty</td>
-                        <td>N/A</td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Rev Argos Scrum</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002SKWBJYA5/view" target="_blank">W-20786376</a></td>
+                        <td>Unable to set a Revenue Cloud Settings via Scratch Org Definition File...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #17a2b8;">Triaged</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Rev Argos Scrum</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002XFBUoYAP/view" target="_blank">W-21838726</a></td>
+                        <td>[Not262FF] Fix the Foreign Key Labels for RMCD, RCMDItem, etc...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #17a2b8;">Triaged</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>SFA Forecasting Scrum Team</td>
+                        <td>a06EE000004rIFtYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Z0Gn7YAF/view" target="_blank">W-22264916</a></td>
+                        <td>[Custom Insights] While inserting RCMD Item via API, the validation is skipped a...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #17a2b8;">Triaged</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Tara Yalamanchi</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002W7xbQYAR/view" target="_blank">W-21553093</a></td>
+                        <td>Revenue Cloud Doc Bug: Document why 0-qty detail lines are created...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #ffc107;">In Progress</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Britney Abraham</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002OYCzmYAH/view" target="_blank">W-20104842</a></td>
+                        <td>Revenue Cloud Doc Bug: Sales Transaction Groups Payload Limitations...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Kavya Nayak</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002RRdCxYAL/view" target="_blank">W-20606193</a></td>
+                        <td>[Revenue Cloud Integration Blitz] Explainability option is enabled for Products ...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Dzianis Tytsik</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002UkBxRYAV/view" target="_blank">W-21261159</a></td>
+                        <td>[Ignored Email Nudge] Exclude Declined RcmdItems....</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Prudhvi Khanderao</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VNjOjYAL/view" target="_blank">W-21362103</a></td>
+                        <td>Prioritized Rcmd Item is not Inheriting Custom Sharing Provider of Parent...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Lu Ping Chen ☢</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VRrHOYA1/view" target="_blank">W-21374122</a></td>
+                        <td>[RCM] Make clause selection data table search case insensitive...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Shourya Khare</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WEyNtYAL/view" target="_blank">W-21583511</a></td>
+                        <td>[RCM] Update RegulationIngestedData Status enums...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Shourya Khare</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WMZwZYAX/view" target="_blank">W-21612153</a></td>
+                        <td>[RCM] Add promotion ftests and label updates...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Shourya Khare</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WsFKcYAN/view" target="_blank">W-21730688</a></td>
+                        <td>[RCM] Clause promotion PFT for Regulation Ingested Data...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Riya Patil</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262.2">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002XRBqKYAX/view" target="_blank">W-21887749</a></td>
+                        <td>[RCM] Regulation Ingested Data entity changes...</td>
+                        <td><span class="build-badge build-262">262.2</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Nabeel Shaikh</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Z2B9PYAV/view" target="_blank">W-22273654</a></td>
+                        <td>RCM 264 Entity Enabler / Definer / Testing Util Audit fixes...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Daniel Fuller</td>
+                        <td>a06EE000004rIFtYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002R5Et7YAF/view" target="_blank">W-20523193</a></td>
+                        <td>[Accessibility] Reflow: Einstein Assistant Panel (Channel Revenue Management Age...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Duplicate</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Nikhil Gupta (MFG)</td>
+                        <td>a06EE000004rIFsYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002R5Et8YAF/view" target="_blank">W-20523194</a></td>
+                        <td>[Accessibility] Incorrectly provided keyboard focus order: Einstein Assistant Pa...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Duplicate</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>ACC Platform India</td>
+                        <td>a06EE000004rIFsYAM</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002S8iROYAZ/view" target="_blank">W-20745365</a></td>
+                        <td>[260 Q4 Revenue Cloud - Billing]  Sharing Model Metadata Lookup Called 22M Times...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Duplicate</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Sharing Enforcement Scale User</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WS3J4YAL/view" target="_blank">W-21630363</a></td>
+                        <td>[260 Manufacturing ICT] Labels under "Agentforce for Channel Revenue Management"...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Duplicate</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Ruchi Agarwal</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002XesD9YAJ/view" target="_blank">W-21940205</a></td>
+                        <td>[Revenue Cloud Integration Blitz] Config UI updates not working for std w contex...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Not a bug</span></td>
+                        <td><span class="badge badge-priority" style="background: #ffc107;">P2</span></td>
+                        <td>Rev Argos Scrum</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002SKSzVYAX/view" target="_blank">W-20786409</a></td>
+                        <td>Unable to set a Revenue Cloud Settings via Scratch Org Definition File...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Rev Agora Scrum</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002RSPGaYAP/view" target="_blank">W-20609175</a></td>
+                        <td>[Revenue Cloud Integration Blitz] NullPointerException while trying to add a Sta...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #17a2b8;">Triaged</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Jeffrey Gray</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262.7">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002aFdI8YAK/view" target="_blank">W-22538359</a></td>
+                        <td>[262.7] [ECi - createBillingSchedulesFromTrxn failure in Revenue Cloud Billing]S...</td>
+                        <td><span class="build-badge build-262">262.7</span></td>
+                        <td><span class="badge badge-status" style="background: #20c997;">QA In Progress</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Nupur Garg</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002SoAD0YAN/view" target="_blank">W-20878426</a></td>
+                        <td>Case - 472392490 - Telenor Towers Norway AS - Error with billing scheduler in Re...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Srinivas Vemula</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002UfL8UYAV/view" target="_blank">W-21249126</a></td>
+                        <td>[DRO][260] Revenue Management Intelligence apps - SDM Deployment Failed with Err...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Alekhya Idupulapati</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VlcQOYAZ/view" target="_blank">W-21456001</a></td>
+                        <td>Fix RCMD label bug...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Lu Ping Chen ☢</td>
+                        <td>a06900000009Q0dAAE</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WL4ARYA1/view" target="_blank">W-21605361</a></td>
+                        <td>Unable to save ConsumerSalesContext context definition on Revenue Management Def...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Vicky Raj</td>
+                        <td>a06EE00000QXmDNYA1</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WjgoIYAR/view" target="_blank">W-21699175</a></td>
+                        <td>[262 FF] Hide PrioritizedRcmdAction entity behind custom perm...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Tara Yalamanchi</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262.2">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002XBHufYAH/view" target="_blank">W-21814980</a></td>
+                        <td>[RCM] Promotion action gack...</td>
+                        <td><span class="build-badge build-262">262.2</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Shourya Khare</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262.2">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002XkCYPYA3/view" target="_blank">W-21956613</a></td>
+                        <td>[Revenue Cloud Integration Blitz] Cannot update qty of bundle with proportional ...</td>
+                        <td><span class="build-badge build-262">262.2</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Kiran Reddy</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="264">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002a9WwEYAU/view" target="_blank">W-22520036</a></td>
+                        <td>[264][ECi - createBillingSchedulesFromTrxn failure in Revenue Cloud Billing]Stan...</td>
+                        <td><span class="build-badge build-264">264</span></td>
+                        <td><span class="badge badge-status" style="background: #28a745;">Closed</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Nupur Garg</td>
+                        <td>a06T0000001eB5OIAU</td>
+                    </tr>
+
+                    <tr class="work-item-row" data-build="262">
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002VUWxwYAH/view" target="_blank">W-21383346</a></td>
+                        <td>[Perf][Sales Workspace] Lock contention in SALE_WORKSPACE_LEAD_RCMD_GNR driving ...</td>
+                        <td><span class="build-badge build-262">262</span></td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">Not Reproducible</span></td>
+                        <td><span class="badge badge-priority" style="background: #fd7e14;">P1</span></td>
+                        <td>Prudhvi Khanderao</td>
+                        <td>a06T0000001eB5OIAU</td>
                     </tr>
 
                 </tbody>
@@ -448,10 +994,10 @@
         new Chart(statusCtx, {
             type: 'pie',
             data: {
-                labels: ["New", "Triaged", "In Progress", "Investigating", "More Info Reqd from Support", "Ready for Review", "Fixed", "QA In Progress", "Closed"],
+                labels: ["New", "Triaged", "In Progress", "Ready for Review", "Fixed", "QA In Progress", "Closed", "Waiting", "Duplicate", "Completed", "Not a bug", "Pending Release", "Not Reproducible"],
                 datasets: [{
-                    data: [306, 12, 67, 4, 1, 17, 26, 3, 564],
-                    backgroundColor: ["#6c757d", "#17a2b8", "#ffc107", "#6c757d", "#6c757d", "#007bff", "#28a745", "#20c997", "#28a745"],
+                    data: [74, 8, 11, 7, 5, 2, 323, 2, 14, 1, 6, 1, 1],
+                    backgroundColor: ["#6c757d", "#17a2b8", "#ffc107", "#007bff", "#28a745", "#20c997", "#28a745", "#fd7e14", "#6c757d", "#6c757d", "#6c757d", "#e83e8c", "#6c757d"],
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]
@@ -487,9 +1033,9 @@
         new Chart(typeCtx, {
             type: 'doughnut',
             data: {
-                labels: [null, "Help", "Investigation", "Template - Bug", "ToDo", "User Story"],
+                labels: [null, "User Story", "Bug", "Help", "Test Failure"],
                 datasets: [{
-                    data: [14, 2, 13, 3, 1, 967],
+                    data: [5, 323, 47, 19, 61],
                     backgroundColor: pieColors,
                     borderWidth: 2,
                     borderColor: '#fff'
@@ -526,11 +1072,11 @@
         new Chart(priorityCtx, {
             type: 'bar',
             data: {
-                labels: [null],
+                labels: [null, "P4", "P3", "P2", "P1"],
                 datasets: [{
                     label: 'Count',
-                    data: [1000],
-                    backgroundColor: ["#6c757d"],
+                    data: [319, 7, 20, 27, 82],
+                    backgroundColor: ["#6c757d", "#6c757d", "#28a745", "#ffc107", "#fd7e14"],
                     borderWidth: 1
                 }]
             },
@@ -554,10 +1100,10 @@
         new Chart(assigneeCtx, {
             type: 'bar',
             data: {
-                labels: ["Hemalatha N", "Unassigned", "Madhuri Mishra", "Kavitha Ramasamy", "Sandeep Marneni", "Raymond Li", "Kavya Nayak", "Sreedhar Reddy Kallu", "Gustavo Armenta", "Swapnil Kharche"],
+                labels: ["Kavya Nayak", "Rishikant Mishra", "Jaspreet Kaur", "Sanjit Roy", "Rajnandini Kumari", "Harshdeep Singh", "Stephen Crecco", "SFA Forecasting Scrum Team", "Shankar Gnanamurthy", "Tanuja Tammireddy"],
                 datasets: [{
                     label: 'Work Items',
-                    data: [114, 85, 79, 54, 33, 27, 25, 24, 20, 18],
+                    data: [75, 14, 14, 13, 10, 9, 9, 8, 8, 8],
                     backgroundColor: 'rgba(30, 60, 114, 0.8)',
                     borderColor: 'rgba(30, 60, 114, 1)',
                     borderWidth: 1
@@ -578,6 +1124,25 @@
                 }
             }
         });
+
+        function filterByBuild(build) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.build === build) {
+                    btn.classList.add('active');
+                }
+            });
+
+            const rows = document.querySelectorAll('.work-item-row');
+            rows.forEach(row => {
+                const rowBuild = row.dataset.build;
+                if (build === 'all' || rowBuild.includes(build)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>

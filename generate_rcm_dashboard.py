@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RCM (Revenue Cloud Management) Dashboard Generator
+RCM (Regulated Content Management) Dashboard Generator
 Queries GUS for RCM project work items and generates an interactive HTML dashboard
 Tracks: Epics, Bugs, Technical Debt, and overall project progress
 """
@@ -18,6 +18,7 @@ RCM_KEYWORDS = [
     "Revenue Cloud",
     "Revenue Management"
 ]
+BUILD_FILTERS = ["262", "264"]  # Target builds to track
 
 def run_sf_query(query):
     """Execute a Salesforce SOQL query and return parsed JSON results."""
@@ -44,6 +45,9 @@ def get_rcm_work_items():
     # Build keyword search condition
     keyword_conditions = " OR ".join([f"Subject__c LIKE '%{keyword}%'" for keyword in RCM_KEYWORDS])
 
+    # Build version filter condition
+    build_conditions = " OR ".join([f"Scheduled_Build_Name__c LIKE '{build}%'" for build in BUILD_FILTERS])
+
     query = f"""
         SELECT Id, Name, Subject__c, Status__c, Type__c, Story_Points__c,
                Assignee__r.Name, Assignee__r.Email,
@@ -52,6 +56,7 @@ def get_rcm_work_items():
                Details__c, CreatedDate, LastModifiedDate, Found_in_Build__c
         FROM ADM_Work__c
         WHERE ({keyword_conditions})
+          AND ({build_conditions})
           AND Status__c != 'Never'
           AND CreatedDate >= 2024-01-01T00:00:00Z
         ORDER BY Priority__c DESC, Status__c, Type__c, Name
@@ -80,6 +85,16 @@ def categorize_items(work_items):
             others.append(item)
 
     return epics, bugs, tds, others
+
+def categorize_by_build(work_items):
+    """Categorize work items by build version."""
+    by_build = defaultdict(list)
+
+    for item in work_items:
+        build = item.get("Scheduled_Build_Name__c", "Unknown")
+        by_build[build].append(item)
+
+    return by_build
 
 def calculate_statistics(work_items):
     """Calculate comprehensive statistics."""
@@ -158,12 +173,16 @@ def generate_html(work_items, epics, bugs, tds, others):
         "P4": "#6c757d"
     }
 
+    # Categorize by build
+    by_build = categorize_by_build(work_items)
+    build_stats = {build: calculate_statistics(items) for build, items in by_build.items()}
+
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCM Project Dashboard - Revenue Cloud Management</title>
+    <title>RCM Project Dashboard - Regulated Content Management</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {{
@@ -211,6 +230,72 @@ def generate_html(work_items, epics, bugs, tds, others):
             margin-top: 15px;
             font-size: 0.95em;
             opacity: 0.85;
+        }}
+
+        .filter-section {{
+            background: white;
+            padding: 25px 40px;
+            border-bottom: 3px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }}
+
+        .filter-label {{
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #495057;
+        }}
+
+        .filter-buttons {{
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }}
+
+        .filter-btn {{
+            padding: 10px 25px;
+            border: 2px solid #1e3c72;
+            background: white;
+            color: #1e3c72;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+        }}
+
+        .filter-btn:hover {{
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }}
+
+        .filter-btn.active {{
+            background: #1e3c72;
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }}
+
+        .build-badge {{
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }}
+
+        .build-262 {{
+            background: #e7f3ff;
+            color: #1e3c72;
+        }}
+
+        .build-264 {{
+            background: #f3e7ff;
+            color: #7e22ce;
         }}
 
         .progress-section {{
@@ -475,8 +560,28 @@ def generate_html(work_items, epics, bugs, tds, others):
     <div class="container">
         <div class="header">
             <h1>🚀 RCM Project Dashboard</h1>
-            <div class="subtitle">Revenue Cloud Management - Project Overview</div>
+            <div class="subtitle">Regulated Content Management - Project Overview</div>
             <div class="timestamp">Generated: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}</div>
+        </div>
+
+        <div class="filter-section">
+            <span class="filter-label">Filter by Build:</span>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-build="all" onclick="filterByBuild('all')">
+                    All Builds ({all_stats['total']})
+                </button>"""
+
+    # Add build filter buttons
+    for build in sorted(by_build.keys()):
+        if build and build != "Unknown":
+            count = len(by_build[build])
+            html += f"""
+                <button class="filter-btn" data-build="{build}" onclick="filterByBuild('{build}')">
+                    {build} ({count})
+                </button>"""
+
+    html += """
+            </div>
         </div>
 
         <div class="progress-section">
@@ -553,6 +658,7 @@ def generate_html(work_items, epics, bugs, tds, others):
                     <tr>
                         <th>ID</th>
                         <th>Subject</th>
+                        <th>Build</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Assignee</th>
@@ -561,21 +667,29 @@ def generate_html(work_items, epics, bugs, tds, others):
                 </thead>
                 <tbody>
 """
-        for epic in epics[:50]:  # Limit to 50 items
+        for epic in epics[:100]:  # Limit to 100 items
             work_id = epic.get("Name", "")
             subject = epic.get("Subject__c", "No subject")
             status = epic.get("Status__c", "Unknown")
             priority = epic.get("Priority__c", "Unknown")
             assignee = epic.get("Assignee__r", {}).get("Name", "Unassigned") if epic.get("Assignee__r") else "Unassigned"
             points = epic.get("Story_Points__c", 0) or 0
+            build = epic.get("Scheduled_Build_Name__c", "Unknown") or "Unknown"
             gus_url = f"https://gus.lightning.force.com/lightning/r/ADM_Work__c/{epic['Id']}/view"
             status_color = status_colors.get(status, "#6c757d")
             priority_color = priority_colors.get(priority, "#6c757d")
 
+            build_class = ""
+            if "262" in build:
+                build_class = "build-262"
+            elif "264" in build:
+                build_class = "build-264"
+
             html += f"""
-                    <tr>
+                    <tr class="work-item-row" data-build="{build}">
                         <td class="work-item-id"><a href="{gus_url}" target="_blank">{work_id}</a></td>
                         <td>{subject[:80]}...</td>
+                        <td><span class="build-badge {build_class}">{build}</span></td>
                         <td><span class="badge badge-status" style="background: {status_color};">{status}</span></td>
                         <td><span class="badge badge-priority" style="background: {priority_color};">{priority}</span></td>
                         <td>{assignee}</td>
@@ -598,6 +712,7 @@ def generate_html(work_items, epics, bugs, tds, others):
                     <tr>
                         <th>ID</th>
                         <th>Subject</th>
+                        <th>Build</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Assignee</th>
@@ -606,21 +721,29 @@ def generate_html(work_items, epics, bugs, tds, others):
                 </thead>
                 <tbody>
 """
-        for bug in bugs[:50]:  # Limit to 50 items
+        for bug in bugs[:100]:  # Limit to 100 items
             work_id = bug.get("Name", "")
             subject = bug.get("Subject__c", "No subject")
             status = bug.get("Status__c", "Unknown")
             priority = bug.get("Priority__c", "Unknown")
             assignee = bug.get("Assignee__r", {}).get("Name", "Unassigned") if bug.get("Assignee__r") else "Unassigned"
             found_in = bug.get("Found_in_Build__c", "N/A") or "N/A"
+            build = bug.get("Scheduled_Build_Name__c", "Unknown") or "Unknown"
             gus_url = f"https://gus.lightning.force.com/lightning/r/ADM_Work__c/{bug['Id']}/view"
             status_color = status_colors.get(status, "#6c757d")
             priority_color = priority_colors.get(priority, "#6c757d")
 
+            build_class = ""
+            if "262" in build:
+                build_class = "build-262"
+            elif "264" in build:
+                build_class = "build-264"
+
             html += f"""
-                    <tr>
+                    <tr class="work-item-row" data-build="{build}">
                         <td class="work-item-id"><a href="{gus_url}" target="_blank">{work_id}</a></td>
                         <td>{subject[:80]}...</td>
+                        <td><span class="build-badge {build_class}">{build}</span></td>
                         <td><span class="badge badge-status" style="background: {status_color};">{status}</span></td>
                         <td><span class="badge badge-priority" style="background: {priority_color};">{priority}</span></td>
                         <td>{assignee}</td>
@@ -643,6 +766,7 @@ def generate_html(work_items, epics, bugs, tds, others):
                     <tr>
                         <th>ID</th>
                         <th>Subject</th>
+                        <th>Build</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Assignee</th>
@@ -651,21 +775,29 @@ def generate_html(work_items, epics, bugs, tds, others):
                 </thead>
                 <tbody>
 """
-        for td in tds[:50]:  # Limit to 50 items
+        for td in tds[:100]:  # Limit to 100 items
             work_id = td.get("Name", "")
             subject = td.get("Subject__c", "No subject")
             status = td.get("Status__c", "Unknown")
             priority = td.get("Priority__c", "Unknown")
             assignee = td.get("Assignee__r", {}).get("Name", "Unassigned") if td.get("Assignee__r") else "Unassigned"
             points = td.get("Story_Points__c", 0) or 0
+            build = td.get("Scheduled_Build_Name__c", "Unknown") or "Unknown"
             gus_url = f"https://gus.lightning.force.com/lightning/r/ADM_Work__c/{td['Id']}/view"
             status_color = status_colors.get(status, "#6c757d")
             priority_color = priority_colors.get(priority, "#6c757d")
 
+            build_class = ""
+            if "262" in build:
+                build_class = "build-262"
+            elif "264" in build:
+                build_class = "build-264"
+
             html += f"""
-                    <tr>
+                    <tr class="work-item-row" data-build="{build}">
                         <td class="work-item-id"><a href="{gus_url}" target="_blank">{work_id}</a></td>
                         <td>{subject[:80]}...</td>
+                        <td><span class="build-badge {build_class}">{build}</span></td>
                         <td><span class="badge badge-status" style="background: {status_color};">{status}</span></td>
                         <td><span class="badge badge-priority" style="background: {priority_color};">{priority}</span></td>
                         <td>{assignee}</td>
@@ -848,6 +980,25 @@ def generate_html(work_items, epics, bugs, tds, others):
                 }}
             }}
         }});
+
+        function filterByBuild(build) {{
+            document.querySelectorAll('.filter-btn').forEach(btn => {{
+                btn.classList.remove('active');
+                if (btn.dataset.build === build) {{
+                    btn.classList.add('active');
+                }}
+            }});
+
+            const rows = document.querySelectorAll('.work-item-row');
+            rows.forEach(row => {{
+                const rowBuild = row.dataset.build;
+                if (build === 'all' || rowBuild.includes(build)) {{
+                    row.style.display = '';
+                }} else {{
+                    row.style.display = 'none';
+                }}
+            }});
+        }}
     </script>
 </body>
 </html>
