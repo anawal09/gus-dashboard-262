@@ -1,0 +1,12 @@
+pages:
+  stage: deploy
+  script:
+    - mkdir -p public
+    - cp *.html public/ || true
+    - cp *.py public/ || true
+    - cp README.md public/ || true
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
