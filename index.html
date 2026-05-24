@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Industries Monthly Release 262.6 Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -225,6 +226,12 @@
             font-size: 1.2em;
             margin-bottom: 15px;
             color: #495057;
+            text-align: center;
+        }
+
+        .chart-canvas {
+            max-height: 400px;
+            margin: 0 auto;
         }
 
         .chart-bar {
@@ -283,24 +290,24 @@
         <div class="header">
             <h1>Industries Monthly Release Dashboard</h1>
             <div class="subtitle">Patch 262.6</div>
-            <div class="timestamp">Generated: May 13, 2026 at 03:45 PM</div>
+            <div class="timestamp">Generated: May 24, 2026 at 03:27 PM</div>
         </div>
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="number">8</div>
+                <div class="number">6</div>
                 <div class="label">Total Items</div>
             </div>
             <div class="stat-card">
-                <div class="number">1</div>
+                <div class="number">3</div>
                 <div class="label">Closed</div>
             </div>
             <div class="stat-card">
-                <div class="number">3</div>
+                <div class="number">1</div>
                 <div class="label">In Progress</div>
             </div>
             <div class="stat-card">
-                <div class="number">12</div>
+                <div class="number">9</div>
                 <div class="label">Story Points</div>
             </div>
         </div>
@@ -311,102 +318,22 @@
 
                 <div class="chart-card">
                     <h3>Status Distribution</h3>
+                    <canvas id="statusPieChart" class="chart-canvas"></canvas>
+                </div>
 
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>In Progress</span>
-                            <span>3 (37.5%)</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 100.0%; background: #ffc107;">
-                            3
-                        </div>
-                    </div>
+                <div class="chart-card">
+                    <h3>Work Item Types</h3>
+                    <canvas id="typePieChart" class="chart-canvas"></canvas>
+                </div>
 
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>Waiting</span>
-                            <span>2 (25.0%)</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 66.66666666666666%; background: #fd7e14;">
-                            2
-                        </div>
-                    </div>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>Triaged</span>
-                            <span>1 (12.5%)</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 33.33333333333333%; background: #17a2b8;">
-                            1
-                        </div>
-                    </div>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>Closed</span>
-                            <span>1 (12.5%)</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 33.33333333333333%; background: #28a745;">
-                            1
-                        </div>
-                    </div>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>Never</span>
-                            <span>1 (12.5%)</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 33.33333333333333%; background: #dc3545;">
-                            1
-                        </div>
-                    </div>
-
+                <div class="chart-card">
+                    <h3>Top Assignees</h3>
+                    <canvas id="assigneeBarChart" class="chart-canvas"></canvas>
                 </div>
 
                 <div class="chart-card">
                     <h3>Product Tags</h3>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>262_Monthly_Release</span>
-                            <span>5</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 100.0%;">
-                            5
-                        </div>
-                    </div>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>CS - Atlas</span>
-                            <span>1</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 20.0%;">
-                            1
-                        </div>
-                    </div>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>Loyalty Velaryon</span>
-                            <span>1</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 20.0%;">
-                            1
-                        </div>
-                    </div>
-
-                    <div class="chart-bar">
-                        <div class="chart-bar-label">
-                            <span>262_Release_Exception</span>
-                            <span>1</span>
-                        </div>
-                        <div class="chart-bar-fill" style="width: 20.0%;">
-                            1
-                        </div>
-                    </div>
-
+                    <canvas id="productBarChart" class="chart-canvas"></canvas>
                 </div>
 
             </div>
@@ -425,29 +352,25 @@
                     <div class="work-item">
                         <div class="work-item-header">
                             <div class="work-item-id">
-                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Yc711YAB/view" target="_blank">W-22170215</a>
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002ZkutNYAR/view" target="_blank">W-22430349</a>
                             </div>
                             <div class="work-item-type">User Story</div>
                         </div>
-                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Orchestrator - DRO - Common Orchestrator Designer License</div>
+                        <div class="work-item-subject">Industries Monthly Release (260 Patch) - Financial Services Cloud - FSC B2B Enhancements</div>
                         <div class="work-item-details">
                             <div class="detail-item">
                                 <span class="detail-label">Assignee:</span>
-                                <span>Jason Zhang</span>
+                                <span>FSC-Gold Leader Scrum Team</span>
                             </div>
 
                             <div class="detail-item">
                                 <span class="detail-label">QA:</span>
-                                <span>Aarti Somani</span>
+                                <span>Karuna Sunkara</span>
                             </div>
 
                             <div class="detail-item">
                                 <span class="detail-label">Product:</span>
-                                <span>262_Monthly_Release</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="points-badge">3 pts</span>
+                                <span>FSC B2B</span>
                             </div>
 
                         </div>
@@ -459,57 +382,9 @@
             <div class="status-group">
                 <div class="status-header" style="background: #ffc107;">
                     <span>In Progress</span>
-                    <span class="status-badge">3 items</span>
+                    <span class="status-badge">1 item</span>
                 </div>
                 <div class="work-items">
-
-                    <div class="work-item">
-                        <div class="work-item-header">
-                            <div class="work-item-id">
-                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002WnUeKYAV/view" target="_blank">W-21713430</a>
-                            </div>
-                            <div class="work-item-type">User Story</div>
-                        </div>
-                        <div class="work-item-subject">Industries Monthly Release (262 Patch) - Education Cloud - SweetPotatoes</div>
-                        <div class="work-item-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Assignee:</span>
-                                <span>Soumya Snehashis</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Product:</span>
-                                <span>262_Monthly_Release</span>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="work-item">
-                        <div class="work-item-header">
-                            <div class="work-item-id">
-                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Y6xPrYAJ/view" target="_blank">W-22030816</a>
-                            </div>
-                            <div class="work-item-type">User Story</div>
-                        </div>
-                        <div class="work-item-subject">Industries Monthly Release (262 Patch-April) - Insurance cloud for FNOL Agent</div>
-                        <div class="work-item-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Assignee:</span>
-                                <span>Soumya Snehashis</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Product:</span>
-                                <span>262_Monthly_Release</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="points-badge">1 pts</span>
-                            </div>
-
-                        </div>
-                    </div>
 
                     <div class="work-item">
                         <div class="work-item-header">
@@ -522,12 +397,7 @@
                         <div class="work-item-details">
                             <div class="detail-item">
                                 <span class="detail-label">Assignee:</span>
-                                <span>Venkata Sandeep Godavarthi</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">QA:</span>
-                                <span>Manad Gupta</span>
+                                <span>Soumya Snehashis</span>
                             </div>
 
                             <div class="detail-item">
@@ -548,9 +418,40 @@
             <div class="status-group">
                 <div class="status-header" style="background: #28a745;">
                     <span>Closed</span>
-                    <span class="status-badge">1 item</span>
+                    <span class="status-badge">3 items</span>
                 </div>
                 <div class="work-items">
+
+                    <div class="work-item">
+                        <div class="work-item-header">
+                            <div class="work-item-id">
+                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002Y6xPrYAJ/view" target="_blank">W-22030816</a>
+                            </div>
+                            <div class="work-item-type">User Story</div>
+                        </div>
+                        <div class="work-item-subject">Industries Monthly Release (262 Patch-April) - Insurance cloud for FNOL Agent</div>
+                        <div class="work-item-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Assignee:</span>
+                                <span>Soumya Snehashis</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">QA:</span>
+                                <span>Srikar Vuthuri</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="detail-label">Product:</span>
+                                <span>262_Monthly_Release</span>
+                            </div>
+
+                            <div class="detail-item">
+                                <span class="points-badge">1 pts</span>
+                            </div>
+
+                        </div>
+                    </div>
 
                     <div class="work-item">
                         <div class="work-item-header">
@@ -583,16 +484,6 @@
                         </div>
                     </div>
 
-                </div>
-            </div>
-
-            <div class="status-group">
-                <div class="status-header" style="background: #fd7e14;">
-                    <span>Waiting</span>
-                    <span class="status-badge">2 items</span>
-                </div>
-                <div class="work-items">
-
                     <div class="work-item">
                         <div class="work-item-header">
                             <div class="work-item-id">
@@ -615,33 +506,6 @@
                             <div class="detail-item">
                                 <span class="detail-label">Product:</span>
                                 <span>Loyalty Velaryon</span>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="work-item">
-                        <div class="work-item-header">
-                            <div class="work-item-id">
-                                <a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002ZkutNYAR/view" target="_blank">W-22430349</a>
-                            </div>
-                            <div class="work-item-type">User Story</div>
-                        </div>
-                        <div class="work-item-subject">Industries Monthly Release (260 Patch) - Financial Services Cloud - Account Plan and Financial Deal Product Enhancements</div>
-                        <div class="work-item-details">
-                            <div class="detail-item">
-                                <span class="detail-label">Assignee:</span>
-                                <span>Vignesh Damodharan</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">QA:</span>
-                                <span>Jatin .</span>
-                            </div>
-
-                            <div class="detail-item">
-                                <span class="detail-label">Product:</span>
-                                <span>262_Release_Exception</span>
                             </div>
 
                         </div>
@@ -697,5 +561,184 @@
             Generated by GUS Dashboard Generator | Data from GUS via Salesforce CLI
         </div>
     </div>
+
+    <script>
+        // Chart.js default configuration
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.color = '#495057';
+
+        // Color palettes
+        const pieColors = [
+            '#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b',
+            '#fa709a', '#fee140', '#30cfd0', '#a8edea', '#fed6e3',
+            '#fbc2eb', '#a6c1ee', '#fccb90', '#d57eeb', '#e0c3fc'
+        ];
+
+        // Status Distribution Pie Chart
+        const statusCtx = document.getElementById('statusPieChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: ["Triaged", "In Progress", "Closed", "Never"],
+                datasets: [{
+                    data: [1, 1, 3, 1],
+                    backgroundColor: ["#17a2b8", "#ffc107", "#28a745", "#dc3545"],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Type Distribution Pie Chart
+        const typeCtx = document.getElementById('typePieChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ["User Story"],
+                datasets: [{
+                    data: [6],
+                    backgroundColor: pieColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Assignee Bar Chart
+        const assigneeCtx = document.getElementById('assigneeBarChart').getContext('2d');
+        new Chart(assigneeCtx, {
+            type: 'bar',
+            data: {
+                labels: ["FSC-Gold Leader Scrum Team", "Soumya Snehashis", "Kaustub Sreekrishnan", "Kartik Singal", "Yury Petrov"],
+                datasets: [{
+                    label: 'Work Items',
+                    data: [1, 2, 1, 1, 1],
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Items: ' + context.parsed.y;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Product Tag Bar Chart
+        const productCtx = document.getElementById('productBarChart').getContext('2d');
+        new Chart(productCtx, {
+            type: 'bar',
+            data: {
+                labels: ["FSC B2B", "262_Monthly_Release", "CS - Atlas", "Loyalty Velaryon"],
+                datasets: [{
+                    label: 'Work Items',
+                    data: [1, 3, 1, 1],
+                    backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                    borderColor: 'rgba(118, 75, 162, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Items: ' + context.parsed.x;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    </script>
 </body>
 </html>
