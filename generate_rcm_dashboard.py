@@ -561,7 +561,7 @@ def generate_html(work_items, epics, bugs, tds, others):
                     Build {build_num} ({count})
                 </button>"""
 
-    html += """
+    html += f"""
             </div>
         </div>
 
