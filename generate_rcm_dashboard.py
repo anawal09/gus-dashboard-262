@@ -14,9 +14,7 @@ from collections import defaultdict
 # Configuration
 TARGET_ORG = "anawal-gus"
 RCM_KEYWORDS = [
-    "RCM",
-    "Revenue Cloud",
-    "Revenue Management"
+    "Regulated Content"
 ]
 BUILD_FILTERS = ["262", "264"]  # Target builds to track
 
@@ -62,10 +60,9 @@ def get_rcm_work_items():
         WHERE ({keyword_conditions})
           AND ({build_conditions})
           AND {team_filter}
-          AND (Type__c LIKE '%Epic%' OR Type__c LIKE '%Bug%')
           AND Status__c != 'Never'
           AND CreatedDate >= 2024-01-01T00:00:00Z
-        ORDER BY Priority__c DESC, Status__c, Type__c, Name
+        ORDER BY Scheduled_Build_Name__c DESC, Priority__c DESC, Status__c, Type__c, Name
         LIMIT 1000
     """
     return run_sf_query(query)
