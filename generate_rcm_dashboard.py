@@ -41,22 +41,28 @@ def run_sf_query(query):
         sys.exit(1)
 
 def get_rcm_work_items():
-    """Fetch all RCM-related work items."""
+    """Fetch all RCM-related work items for LifeSciences teams."""
     # Build keyword search condition
     keyword_conditions = " OR ".join([f"Subject__c LIKE '%{keyword}%'" for keyword in RCM_KEYWORDS])
 
     # Build version filter condition
     build_conditions = " OR ".join([f"Scheduled_Build_Name__c LIKE '{build}%'" for build in BUILD_FILTERS])
 
+    # Team filter
+    team_filter = "(Scrum_Team__r.Name = 'LifeSciences-Ahsoka' OR Scrum_Team__r.Name = 'LifeSciences-Skywalker')"
+
     query = f"""
         SELECT Id, Name, Subject__c, Status__c, Type__c, Story_Points__c,
                Assignee__r.Name, Assignee__r.Email,
                Product_Tag__r.Name, Scheduled_Build_Name__c,
                Theme__r.Name, Priority__c, QA_Engineer__r.Name,
-               Details__c, CreatedDate, LastModifiedDate, Found_in_Build__c
+               Details__c, CreatedDate, LastModifiedDate, Found_in_Build__c,
+               Scrum_Team__r.Name
         FROM ADM_Work__c
         WHERE ({keyword_conditions})
           AND ({build_conditions})
+          AND {team_filter}
+          AND (Type__c LIKE '%Epic%' OR Type__c LIKE '%Bug%')
           AND Status__c != 'Never'
           AND CreatedDate >= 2024-01-01T00:00:00Z
         ORDER BY Priority__c DESC, Status__c, Type__c, Name
@@ -138,11 +144,8 @@ def calculate_statistics(work_items):
 def generate_html(work_items, epics, bugs, tds, others):
     """Generate comprehensive HTML dashboard."""
 
-    # Calculate statistics
+    # Calculate statistics for all items (treating as epics)
     all_stats = calculate_statistics(work_items)
-    epic_stats = calculate_statistics(epics)
-    bug_stats = calculate_statistics(bugs)
-    td_stats = calculate_statistics(tds)
 
     # Calculate completion percentage
     completion_pct = 0
@@ -548,18 +551,17 @@ def generate_html(work_items, epics, bugs, tds, others):
 
         <div class="filter-section">
             <span class="filter-label">Filter by Build:</span>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-build="all" onclick="filterByBuild('all')">
-                    All Builds ({all_stats['total']})
-                </button>"""
+            <div class="filter-buttons">"""
 
-    # Add build filter buttons
-    for build in sorted(by_build.keys()):
-        if build and build != "Unknown":
-            count = len(by_build[build])
+    # Add only 262 and 264 filter buttons
+    for build_num in BUILD_FILTERS:
+        matching_builds = [b for b in by_build.keys() if build_num in str(b)]
+        if matching_builds:
+            count = sum(len(by_build[b]) for b in matching_builds)
+            active_class = "active" if build_num == "262" else ""
             html += f"""
-                <button class="filter-btn" data-build="{build}" onclick="filterByBuild('{build}')">
-                    {build} ({count})
+                <button class="filter-btn {active_class}" data-build="{build_num}" onclick="filterByBuild('{build_num}')">
+                    Build {build_num} ({count})
                 </button>"""
 
     html += """
@@ -578,24 +580,13 @@ def generate_html(work_items, epics, bugs, tds, others):
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card epic">
                 <div class="number">{all_stats['total']}</div>
                 <div class="label">Total Items</div>
             </div>
-            <div class="stat-card epic">
-                <div class="number">{len(epics)}</div>
-                <div class="label">Epics</div>
-                <div class="sublabel">{epic_stats['total_points']:.0f} points</div>
-            </div>
-            <div class="stat-card bug">
-                <div class="number">{len(bugs)}</div>
-                <div class="label">Bugs</div>
-                <div class="sublabel">{all_stats['by_status'].get('Closed', 0)} closed</div>
-            </div>
-            <div class="stat-card td">
-                <div class="number">{len(tds)}</div>
-                <div class="label">Tech Debt</div>
-                <div class="sublabel">{td_stats['total_points']:.0f} points</div>
+            <div class="stat-card">
+                <div class="number">{all_stats['total_points']:.0f}</div>
+                <div class="label">Story Points</div>
             </div>
             <div class="stat-card">
                 <div class="number">{all_stats['by_status'].get('In Progress', 0)}</div>
@@ -606,35 +597,12 @@ def generate_html(work_items, epics, bugs, tds, others):
                 <div class="label">Completed</div>
             </div>
         </div>
-
-        <div class="section">
-            <h2>📊 Analytics Overview</h2>
-            <div class="chart-container">
-                <div class="chart-card">
-                    <h3>Status Distribution</h3>
-                    <canvas id="statusPieChart" class="chart-canvas"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Work Item Types</h3>
-                    <canvas id="typeDoughnutChart" class="chart-canvas"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Priority Breakdown</h3>
-                    <canvas id="priorityBarChart" class="chart-canvas"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Team Workload (Top 10)</h3>
-                    <canvas id="assigneeBarChart" class="chart-canvas"></canvas>
-                </div>
-            </div>
-        </div>
 """
 
-    # Epic section
-    if epics:
-        html += """
+    # Epic section - Show all epics (not just categorized ones)
+    html += """
         <div class="section">
-            <h2 class="epic-header">🎯 Epics Progress</h2>
+            <h2 class="epic-header">🎯 Epics</h2>
             <table class="work-item-table">
                 <thead>
                     <tr>
@@ -649,7 +617,8 @@ def generate_html(work_items, epics, bugs, tds, others):
                 </thead>
                 <tbody>
 """
-        for epic in epics[:100]:  # Limit to 100 items
+    # Show all work items as epics since we're focusing on epic-level
+    for epic in work_items[:200]:  # Show up to 200 items
             work_id = epic.get("Name", "")
             subject = epic.get("Subject__c", "No subject")
             status = epic.get("Status__c", "Unknown")
@@ -670,7 +639,7 @@ def generate_html(work_items, epics, bugs, tds, others):
             html += f"""
                     <tr class="work-item-row" data-build="{build}">
                         <td class="work-item-id"><a href="{gus_url}" target="_blank">{work_id}</a></td>
-                        <td>{subject[:80]}...</td>
+                        <td>{subject[:100] if len(subject) <= 100 else subject[:100] + '...'}</td>
                         <td><span class="build-badge {build_class}">{build}</span></td>
                         <td><span class="badge badge-status" style="background: {status_color};">{status}</span></td>
                         <td><span class="badge badge-priority" style="background: {priority_color};">{priority}</span></td>
@@ -678,115 +647,7 @@ def generate_html(work_items, epics, bugs, tds, others):
                         <td><strong>{int(points)}</strong></td>
                     </tr>
 """
-        html += """
-                </tbody>
-            </table>
-        </div>
-"""
-
-    # Bug section
-    if bugs:
-        html += """
-        <div class="section">
-            <h2 class="bug-header">🐛 Bug Tracking</h2>
-            <table class="work-item-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Subject</th>
-                        <th>Build</th>
-                        <th>Status</th>
-                        <th>Priority</th>
-                        <th>Assignee</th>
-                        <th>Found In</th>
-                    </tr>
-                </thead>
-                <tbody>
-"""
-        for bug in bugs[:100]:  # Limit to 100 items
-            work_id = bug.get("Name", "")
-            subject = bug.get("Subject__c", "No subject")
-            status = bug.get("Status__c", "Unknown")
-            priority = bug.get("Priority__c", "Unknown")
-            assignee = bug.get("Assignee__r", {}).get("Name", "Unassigned") if bug.get("Assignee__r") else "Unassigned"
-            found_in = bug.get("Found_in_Build__c", "N/A") or "N/A"
-            build = bug.get("Scheduled_Build_Name__c", "Unknown") or "Unknown"
-            gus_url = f"https://gus.lightning.force.com/lightning/r/ADM_Work__c/{bug['Id']}/view"
-            status_color = status_colors.get(status, "#6c757d")
-            priority_color = priority_colors.get(priority, "#6c757d")
-
-            build_class = ""
-            if "262" in build:
-                build_class = "build-262"
-            elif "264" in build:
-                build_class = "build-264"
-
-            html += f"""
-                    <tr class="work-item-row" data-build="{build}">
-                        <td class="work-item-id"><a href="{gus_url}" target="_blank">{work_id}</a></td>
-                        <td>{subject[:80]}...</td>
-                        <td><span class="build-badge {build_class}">{build}</span></td>
-                        <td><span class="badge badge-status" style="background: {status_color};">{status}</span></td>
-                        <td><span class="badge badge-priority" style="background: {priority_color};">{priority}</span></td>
-                        <td>{assignee}</td>
-                        <td>{found_in}</td>
-                    </tr>
-"""
-        html += """
-                </tbody>
-            </table>
-        </div>
-"""
-
-    # Tech Debt section
-    if tds:
-        html += """
-        <div class="section">
-            <h2 class="td-header">⚙️ Technical Debt</h2>
-            <table class="work-item-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Subject</th>
-                        <th>Build</th>
-                        <th>Status</th>
-                        <th>Priority</th>
-                        <th>Assignee</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-"""
-        for td in tds[:100]:  # Limit to 100 items
-            work_id = td.get("Name", "")
-            subject = td.get("Subject__c", "No subject")
-            status = td.get("Status__c", "Unknown")
-            priority = td.get("Priority__c", "Unknown")
-            assignee = td.get("Assignee__r", {}).get("Name", "Unassigned") if td.get("Assignee__r") else "Unassigned"
-            points = td.get("Story_Points__c", 0) or 0
-            build = td.get("Scheduled_Build_Name__c", "Unknown") or "Unknown"
-            gus_url = f"https://gus.lightning.force.com/lightning/r/ADM_Work__c/{td['Id']}/view"
-            status_color = status_colors.get(status, "#6c757d")
-            priority_color = priority_colors.get(priority, "#6c757d")
-
-            build_class = ""
-            if "262" in build:
-                build_class = "build-262"
-            elif "264" in build:
-                build_class = "build-264"
-
-            html += f"""
-                    <tr class="work-item-row" data-build="{build}">
-                        <td class="work-item-id"><a href="{gus_url}" target="_blank">{work_id}</a></td>
-                        <td>{subject[:80]}...</td>
-                        <td><span class="build-badge {build_class}">{build}</span></td>
-                        <td><span class="badge badge-status" style="background: {status_color};">{status}</span></td>
-                        <td><span class="badge badge-priority" style="background: {priority_color};">{priority}</span></td>
-                        <td>{assignee}</td>
-                        <td><strong>{int(points)}</strong></td>
-                    </tr>
-"""
-        html += """
+    html += """
                 </tbody>
             </table>
         </div>
@@ -799,170 +660,6 @@ def generate_html(work_items, epics, bugs, tds, others):
     </div>
 
     <script>
-        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        Chart.defaults.color = '#495057';
-
-        const pieColors = [
-            '#1e3c72', '#2a5298', '#7e22ce', '#28a745', '#dc3545',
-            '#ffc107', '#17a2b8', '#6c757d', '#20c997', '#fd7e14',
-            '#e83e8c', '#6f42c1', '#007bff', '#343a40', '#f8f9fa'
-        ];
-"""
-
-    # Prepare chart data
-    status_labels = list(all_stats['by_status'].keys())
-    status_data = list(all_stats['by_status'].values())
-    status_bg_colors = [status_colors.get(s, '#6c757d') for s in status_labels]
-
-    type_labels = list(all_stats['by_type'].keys())
-    type_data = list(all_stats['by_type'].values())
-
-    priority_labels = list(all_stats['by_priority'].keys())
-    priority_data = list(all_stats['by_priority'].values())
-    priority_bg_colors = [priority_colors.get(p, '#6c757d') for p in priority_labels]
-
-    assignee_items = sorted(all_stats['by_assignee'].items(), key=lambda x: -x[1])[:10]
-    assignee_labels = [a[0] for a in assignee_items]
-    assignee_data = [a[1] for a in assignee_items]
-
-    # Add chart scripts
-    html += f"""
-        // Status Pie Chart
-        const statusCtx = document.getElementById('statusPieChart').getContext('2d');
-        new Chart(statusCtx, {{
-            type: 'pie',
-            data: {{
-                labels: {json.dumps(status_labels)},
-                datasets: [{{
-                    data: {json.dumps(status_data)},
-                    backgroundColor: {json.dumps(status_bg_colors)},
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }}]
-            }},
-            options: {{
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {{
-                    legend: {{
-                        position: 'bottom',
-                        labels: {{
-                            padding: 12,
-                            font: {{ size: 11 }}
-                        }}
-                    }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(context) {{
-                                const label = context.label || '';
-                                const value = context.parsed || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return label + ': ' + value + ' (' + percentage + '%)';
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-        }});
-
-        // Type Doughnut Chart
-        const typeCtx = document.getElementById('typeDoughnutChart').getContext('2d');
-        new Chart(typeCtx, {{
-            type: 'doughnut',
-            data: {{
-                labels: {json.dumps(type_labels)},
-                datasets: [{{
-                    data: {json.dumps(type_data)},
-                    backgroundColor: pieColors,
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }}]
-            }},
-            options: {{
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {{
-                    legend: {{
-                        position: 'bottom',
-                        labels: {{
-                            padding: 12,
-                            font: {{ size: 11 }}
-                        }}
-                    }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(context) {{
-                                const label = context.label || '';
-                                const value = context.parsed || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((value / total) * 100).toFixed(1);
-                                return label + ': ' + value + ' (' + percentage + '%)';
-                            }}
-                        }}
-                    }}
-                }}
-            }}
-        }});
-
-        // Priority Bar Chart
-        const priorityCtx = document.getElementById('priorityBarChart').getContext('2d');
-        new Chart(priorityCtx, {{
-            type: 'bar',
-            data: {{
-                labels: {json.dumps(priority_labels)},
-                datasets: [{{
-                    label: 'Count',
-                    data: {json.dumps(priority_data)},
-                    backgroundColor: {json.dumps(priority_bg_colors)},
-                    borderWidth: 1
-                }}]
-            }},
-            options: {{
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {{
-                    y: {{
-                        beginAtZero: true,
-                        ticks: {{ stepSize: 1 }}
-                    }}
-                }},
-                plugins: {{
-                    legend: {{ display: false }}
-                }}
-            }}
-        }});
-
-        // Assignee Bar Chart
-        const assigneeCtx = document.getElementById('assigneeBarChart').getContext('2d');
-        new Chart(assigneeCtx, {{
-            type: 'bar',
-            data: {{
-                labels: {json.dumps(assignee_labels)},
-                datasets: [{{
-                    label: 'Work Items',
-                    data: {json.dumps(assignee_data)},
-                    backgroundColor: 'rgba(30, 60, 114, 0.8)',
-                    borderColor: 'rgba(30, 60, 114, 1)',
-                    borderWidth: 1
-                }}]
-            }},
-            options: {{
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: true,
-                scales: {{
-                    x: {{
-                        beginAtZero: true,
-                        ticks: {{ stepSize: 1 }}
-                    }}
-                }},
-                plugins: {{
-                    legend: {{ display: false }}
-                }}
-            }}
-        }});
-
         function filterByBuild(build) {{
             document.querySelectorAll('.filter-btn').forEach(btn => {{
                 btn.classList.remove('active');
@@ -974,13 +671,18 @@ def generate_html(work_items, epics, bugs, tds, others):
             const rows = document.querySelectorAll('.work-item-row');
             rows.forEach(row => {{
                 const rowBuild = row.dataset.build;
-                if (build === 'all' || rowBuild.includes(build)) {{
+                if (rowBuild.includes(build)) {{
                     row.style.display = '';
                 }} else {{
                     row.style.display = 'none';
                 }}
             }});
         }}
+
+        // Apply default filter on page load
+        window.addEventListener('DOMContentLoaded', function() {{
+            filterByBuild('262');
+        }});
     </script>
 </body>
 </html>
