@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCM Project Dashboard - Revenue Cloud Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header .subtitle {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+
+        .header .timestamp {
+            margin-top: 15px;
+            font-size: 0.95em;
+            opacity: 0.85;
+        }
+
+        .progress-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 40px;
+            border-bottom: 3px solid #1e3c72;
+        }
+
+        .progress-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-label {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            background: white;
+            border-radius: 50px;
+            height: 60px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.3em;
+            transition: width 1s ease-in-out;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s;
+            border-top: 4px solid #1e3c72;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-card.epic {
+            border-top-color: #7e22ce;
+        }
+
+        .stat-card.bug {
+            border-top-color: #dc3545;
+        }
+
+        .stat-card.td {
+            border-top-color: #ffc107;
+        }
+
+        .stat-card .number {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+
+        .stat-card.epic .number {
+            color: #7e22ce;
+        }
+
+        .stat-card.bug .number {
+            color: #dc3545;
+        }
+
+        .stat-card.td .number {
+            color: #ffc107;
+        }
+
+        .stat-card .label {
+            font-size: 1.05em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-card .sublabel {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .section {
+            padding: 40px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .section h2 {
+            font-size: 2em;
+            margin-bottom: 25px;
+            color: #1e3c72;
+            border-left: 5px solid #1e3c72;
+            padding-left: 20px;
+        }
+
+        .section h2.epic-header {
+            border-left-color: #7e22ce;
+            color: #7e22ce;
+        }
+
+        .section h2.bug-header {
+            border-left-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .section h2.td-header {
+            border-left-color: #ffc107;
+            color: #ffc107;
+        }
+
+        .chart-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #495057;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .chart-canvas {
+            max-height: 350px;
+            margin: 0 auto;
+        }
+
+        .work-item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .work-item-table th {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        .work-item-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .work-item-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .work-item-id {
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .work-item-id a {
+            color: #1e3c72;
+            text-decoration: none;
+        }
+
+        .work-item-id a:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-status {
+            color: white;
+        }
+
+        .badge-priority {
+            color: white;
+        }
+
+        .badge-type {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .footer {
+            padding: 25px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+
+            .work-item-table {
+                font-size: 0.85em;
+            }
+
+            .work-item-table th,
+            .work-item-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 RCM Project Dashboard</h1>
+            <div class="subtitle">Revenue Cloud Management - Project Overview</div>
+            <div class="timestamp">Generated: May 24, 2026 at 04:44 PM</div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-container">
+                <div class="progress-label">Overall Project Completion: 62.4%</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 62.38095238095238%;">
+                        917 / 1470 pts
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number">1000</div>
+                <div class="label">Total Items</div>
+            </div>
+            <div class="stat-card epic">
+                <div class="number">0</div>
+                <div class="label">Epics</div>
+                <div class="sublabel">0 points</div>
+            </div>
+            <div class="stat-card bug">
+                <div class="number">3</div>
+                <div class="label">Bugs</div>
+                <div class="sublabel">564 closed</div>
+            </div>
+            <div class="stat-card td">
+                <div class="number">0</div>
+                <div class="label">Tech Debt</div>
+                <div class="sublabel">0 points</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">67</div>
+                <div class="label">In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">564</div>
+                <div class="label">Completed</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Analytics Overview</h2>
+            <div class="chart-container">
+                <div class="chart-card">
+                    <h3>Status Distribution</h3>
+                    <canvas id="statusPieChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Work Item Types</h3>
+                    <canvas id="typeDoughnutChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Priority Breakdown</h3>
+                    <canvas id="priorityBarChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Team Workload (Top 10)</h3>
+                    <canvas id="assigneeBarChart" class="chart-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="bug-header">🐛 Bug Tracking</h2>
+            <table class="work-item-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Assignee</th>
+                        <th>Found In</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr>
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE000025Mt8uYAC/view" target="_blank">W-17222652</a></td>
+                        <td>[Template to address feedback for Revenue Cloud Developer Guide]...</td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
+                        <td><span class="badge badge-priority" style="background: #6c757d;">None</span></td>
+                        <td>Unassigned</td>
+                        <td>N/A</td>
+                    </tr>
+
+                    <tr>
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002AwtL0YAJ/view" target="_blank">W-18017985</a></td>
+                        <td>[USABILITY] [REVENUE CLOUD]: <Your subject name here>...</td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
+                        <td><span class="badge badge-priority" style="background: #6c757d;">None</span></td>
+                        <td>Jennifer Bove</td>
+                        <td>N/A</td>
+                    </tr>
+
+                    <tr>
+                        <td class="work-item-id"><a href="https://gus.lightning.force.com/lightning/r/ADM_Work__c/a07EE00002KgFRlYAN/view" target="_blank">W-19418005</a></td>
+                        <td>[Revenue Cloud Integration Blitz] <Bug Subject Description>...</td>
+                        <td><span class="badge badge-status" style="background: #6c757d;">New</span></td>
+                        <td><span class="badge badge-priority" style="background: #6c757d;">None</span></td>
+                        <td>Pranita Morisetty</td>
+                        <td>N/A</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Generated by RCM Dashboard Generator | Data from GUS via Salesforce CLI
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.color = '#495057';
+
+        const pieColors = [
+            '#1e3c72', '#2a5298', '#7e22ce', '#28a745', '#dc3545',
+            '#ffc107', '#17a2b8', '#6c757d', '#20c997', '#fd7e14',
+            '#e83e8c', '#6f42c1', '#007bff', '#343a40', '#f8f9fa'
+        ];
+
+        // Status Pie Chart
+        const statusCtx = document.getElementById('statusPieChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: ["New", "Triaged", "In Progress", "Investigating", "More Info Reqd from Support", "Ready for Review", "Fixed", "QA In Progress", "Closed"],
+                datasets: [{
+                    data: [306, 12, 67, 4, 1, 17, 26, 3, 564],
+                    backgroundColor: ["#6c757d", "#17a2b8", "#ffc107", "#6c757d", "#6c757d", "#007bff", "#28a745", "#20c997", "#28a745"],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 12,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Type Doughnut Chart
+        const typeCtx = document.getElementById('typeDoughnutChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [null, "Help", "Investigation", "Template - Bug", "ToDo", "User Story"],
+                datasets: [{
+                    data: [14, 2, 13, 3, 1, 967],
+                    backgroundColor: pieColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 12,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Priority Bar Chart
+        const priorityCtx = document.getElementById('priorityBarChart').getContext('2d');
+        new Chart(priorityCtx, {
+            type: 'bar',
+            data: {
+                labels: [null],
+                datasets: [{
+                    label: 'Count',
+                    data: [1000],
+                    backgroundColor: ["#6c757d"],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Assignee Bar Chart
+        const assigneeCtx = document.getElementById('assigneeBarChart').getContext('2d');
+        new Chart(assigneeCtx, {
+            type: 'bar',
+            data: {
+                labels: ["Hemalatha N", "Unassigned", "Madhuri Mishra", "Kavitha Ramasamy", "Sandeep Marneni", "Raymond Li", "Kavya Nayak", "Sreedhar Reddy Kallu", "Gustavo Armenta", "Swapnil Kharche"],
+                datasets: [{
+                    label: 'Work Items',
+                    data: [114, 85, 79, 54, 33, 27, 25, 24, 20, 18],
+                    backgroundColor: 'rgba(30, 60, 114, 0.8)',
+                    borderColor: 'rgba(30, 60, 114, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
