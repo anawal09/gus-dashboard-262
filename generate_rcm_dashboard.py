@@ -149,28 +149,28 @@ def generate_html(work_items, epics, bugs, tds, others):
     if all_stats['total_points'] > 0:
         completion_pct = (all_stats['completed_points'] / all_stats['total_points']) * 100
 
-    # Status colors
+    # Status colors - clean and subtle
     status_colors = {
-        "New": "#6c757d",
-        "Triaged": "#17a2b8",
-        "In Progress": "#ffc107",
-        "Ready for Review": "#007bff",
-        "Fixed": "#28a745",
-        "QA In Progress": "#20c997",
-        "Closed": "#28a745",
-        "Waiting": "#fd7e14",
-        "Integrate": "#6f42c1",
-        "Pending Release": "#e83e8c",
-        "Never": "#dc3545"
+        "New": "#718096",
+        "Triaged": "#4299e1",
+        "In Progress": "#f6ad55",
+        "Ready for Review": "#4299e1",
+        "Fixed": "#48bb78",
+        "QA In Progress": "#38b2ac",
+        "Closed": "#48bb78",
+        "Waiting": "#ed8936",
+        "Integrate": "#9f7aea",
+        "Pending Release": "#d69e2e",
+        "Never": "#f56565"
     }
 
-    # Priority colors
+    # Priority colors - clean and subtle
     priority_colors = {
-        "P0": "#dc3545",
-        "P1": "#fd7e14",
-        "P2": "#ffc107",
-        "P3": "#28a745",
-        "P4": "#6c757d"
+        "P0": "#f56565",
+        "P1": "#ed8936",
+        "P2": "#ecc94b",
+        "P3": "#48bb78",
+        "P4": "#a0aec0"
     }
 
     # Categorize by build
@@ -193,115 +193,113 @@ def generate_html(work_items, epics, bugs, tds, others):
 
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
-            padding: 20px;
-            color: #333;
+            background: #f5f7fa;
+            padding: 0;
+            margin: 0;
+            color: #2c3e50;
         }}
 
         .container {{
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            overflow: hidden;
+            min-height: 100vh;
         }}
 
         .header {{
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
+            background: white;
+            border-bottom: 1px solid #e1e8ed;
+            padding: 30px 40px;
         }}
 
         .header h1 {{
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2em;
+            margin-bottom: 8px;
+            color: #1a202c;
+            font-weight: 600;
         }}
 
         .header .subtitle {{
-            font-size: 1.3em;
-            opacity: 0.95;
+            font-size: 1em;
+            color: #718096;
             margin-bottom: 5px;
         }}
 
         .header .timestamp {{
-            margin-top: 15px;
-            font-size: 0.95em;
-            opacity: 0.85;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #a0aec0;
         }}
 
         .filter-section {{
-            background: white;
-            padding: 25px 40px;
-            border-bottom: 3px solid #e9ecef;
+            background: #fafbfc;
+            padding: 20px 40px;
+            border-bottom: 1px solid #e1e8ed;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         }}
 
         .filter-label {{
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #495057;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #718096;
         }}
 
         .filter-buttons {{
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }}
 
         .filter-btn {{
-            padding: 10px 25px;
-            border: 2px solid #1e3c72;
+            padding: 8px 20px;
+            border: 1px solid #cbd5e0;
             background: white;
-            color: #1e3c72;
-            border-radius: 25px;
-            font-weight: 600;
+            color: #4a5568;
+            border-radius: 6px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1em;
+            transition: all 0.2s;
+            font-size: 0.9em;
         }}
 
         .filter-btn:hover {{
-            background: #f8f9fa;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: #f7fafc;
+            border-color: #4299e1;
         }}
 
         .filter-btn.active {{
-            background: #1e3c72;
+            background: #4299e1;
             color: white;
-            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+            border-color: #4299e1;
         }}
 
         .build-badge {{
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.8em;
-            font-weight: 600;
-            margin-left: 8px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 500;
         }}
 
         .build-262 {{
-            background: #e7f3ff;
-            color: #1e3c72;
+            background: #ebf8ff;
+            color: #2c5282;
+            border: 1px solid #bee3f8;
         }}
 
         .build-264 {{
-            background: #f3e7ff;
-            color: #7e22ce;
+            background: #faf5ff;
+            color: #6b46c1;
+            border: 1px solid #e9d8fd;
         }}
 
         .progress-section {{
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 40px;
-            border-bottom: 3px solid #1e3c72;
+            background: white;
+            padding: 30px 40px;
+            border-bottom: 1px solid #e1e8ed;
         }}
 
         .progress-container {{
@@ -310,196 +308,179 @@ def generate_html(work_items, epics, bugs, tds, others):
         }}
 
         .progress-label {{
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #1e3c72;
-            margin-bottom: 15px;
-            text-align: center;
+            font-size: 1em;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 12px;
         }}
 
         .progress-bar-container {{
-            background: white;
-            border-radius: 50px;
-            height: 60px;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+            background: #f7fafc;
+            border-radius: 8px;
+            height: 40px;
+            border: 1px solid #e1e8ed;
             overflow: hidden;
             position: relative;
         }}
 
         .progress-bar {{
             height: 100%;
-            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-            border-radius: 50px;
+            background: #48bb78;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: bold;
-            font-size: 1.3em;
+            font-weight: 600;
+            font-size: 0.95em;
             transition: width 1s ease-in-out;
-            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
         }}
 
         .stats-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            padding: 30px;
-            background: #f8f9fa;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 30px 40px;
+            background: #fafbfc;
+            border-bottom: 1px solid #e1e8ed;
         }}
 
         .stat-card {{
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
             text-align: center;
-            transition: all 0.3s;
-            border-top: 4px solid #1e3c72;
+            transition: all 0.2s;
         }}
 
         .stat-card:hover {{
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        }}
-
-        .stat-card.epic {{
-            border-top-color: #7e22ce;
-        }}
-
-        .stat-card.bug {{
-            border-top-color: #dc3545;
-        }}
-
-        .stat-card.td {{
-            border-top-color: #ffc107;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
         }}
 
         .stat-card .number {{
-            font-size: 3.5em;
-            font-weight: bold;
-            color: #1e3c72;
-            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
         }}
 
         .stat-card.epic .number {{
-            color: #7e22ce;
+            color: #805ad5;
         }}
 
         .stat-card.bug .number {{
-            color: #dc3545;
+            color: #f56565;
         }}
 
         .stat-card.td .number {{
-            color: #ffc107;
+            color: #ed8936;
         }}
 
         .stat-card .label {{
-            font-size: 1.05em;
-            color: #666;
+            font-size: 0.85em;
+            color: #718096;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-weight: 500;
         }}
 
         .stat-card .sublabel {{
-            font-size: 0.85em;
-            color: #999;
-            margin-top: 5px;
+            font-size: 0.8em;
+            color: #a0aec0;
+            margin-top: 4px;
         }}
 
         .section {{
-            padding: 40px;
-            border-top: 1px solid #e9ecef;
+            padding: 30px 40px;
+            border-top: 1px solid #e1e8ed;
+            background: white;
         }}
 
         .section h2 {{
-            font-size: 2em;
-            margin-bottom: 25px;
-            color: #1e3c72;
-            border-left: 5px solid #1e3c72;
-            padding-left: 20px;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-weight: 600;
         }}
 
         .section h2.epic-header {{
-            border-left-color: #7e22ce;
-            color: #7e22ce;
+            color: #805ad5;
         }}
 
         .section h2.bug-header {{
-            border-left-color: #dc3545;
-            color: #dc3545;
+            color: #f56565;
         }}
 
         .section h2.td-header {{
-            border-left-color: #ffc107;
-            color: #ffc107;
+            color: #ed8936;
         }}
 
         .chart-container {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }}
 
         .chart-card {{
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e1e8ed;
         }}
 
         .chart-card h3 {{
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            color: #495057;
-            text-align: center;
+            font-size: 1em;
+            margin-bottom: 15px;
+            color: #4a5568;
             font-weight: 600;
         }}
 
         .chart-canvas {{
-            max-height: 350px;
+            max-height: 300px;
             margin: 0 auto;
         }}
 
         .work-item-table {{
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 15px;
             background: white;
+            border: 1px solid #e1e8ed;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }}
 
         .work-item-table th {{
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 15px;
+            background: #f7fafc;
+            color: #4a5568;
+            padding: 12px 15px;
             text-align: left;
             font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.9em;
-            letter-spacing: 0.5px;
+            font-size: 0.8em;
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid #e1e8ed;
         }}
 
         .work-item-table td {{
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f7fafc;
+            font-size: 0.9em;
         }}
 
         .work-item-table tr:hover {{
-            background: #f8f9fa;
+            background: #fafbfc;
         }}
 
         .work-item-id {{
-            font-weight: bold;
-            color: #1e3c72;
+            font-weight: 600;
+            color: #4299e1;
         }}
 
         .work-item-id a {{
-            color: #1e3c72;
+            color: #4299e1;
             text-decoration: none;
         }}
 
@@ -508,10 +489,10 @@ def generate_html(work_items, epics, bugs, tds, others):
         }}
 
         .badge {{
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 500;
             display: inline-block;
         }}
 
@@ -524,16 +505,17 @@ def generate_html(work_items, epics, bugs, tds, others):
         }}
 
         .badge-type {{
-            background: #e9ecef;
-            color: #495057;
+            background: #edf2f7;
+            color: #4a5568;
         }}
 
         .footer {{
-            padding: 25px;
+            padding: 20px 40px;
             text-align: center;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            color: #666;
-            font-size: 0.95em;
+            background: #fafbfc;
+            color: #a0aec0;
+            font-size: 0.85em;
+            border-top: 1px solid #e1e8ed;
         }}
 
         @media (max-width: 768px) {{
